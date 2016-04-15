@@ -126,6 +126,7 @@ class PlayerViewController: UIViewController {
      *  an AVPlayerItem from a url and updating the player's currentitem 
      *  property accordingly.
      */
+    
     func playOrPauseTrack(sender: UIButton) {
         let path = NSBundle.mainBundle().pathForResource("Info", ofType: "plist")
         let clientID = NSDictionary(contentsOfFile: path!)?.valueForKey("client_id") as! String
@@ -134,10 +135,11 @@ class PlayerViewController: UIViewController {
     
         if player.currentItem == nil || track.id != currentTrack!.id {
             let song = AVPlayerItem(URL: url)
+            NSNotificationCenter.defaultCenter().addObserver(self, selector: "playerDidFinishPlaying:", name: AVPlayerItemDidPlayToEndTimeNotification, object: song)
             player.replaceCurrentItemWithPlayerItem(song)
             currentTrack = track
         }
-        
+
         sender.selected = !sender.selected
         if player.rate == 0 {
             player.play()
@@ -147,7 +149,18 @@ class PlayerViewController: UIViewController {
     
     }
     
-    /* 
+    func playerDidFinishPlaying(note: NSNotification) {
+        nextTrackTapped(nextButton)
+        playPauseButton.selected = !playPauseButton.selected
+        playOrPauseTrack(playPauseButton)
+    
+    }
+    
+    deinit {
+        NSNotificationCenter.defaultCenter().removeObserver(self)
+    }
+    
+    /*
      * Called when the next button is tapped. It should check if there is a next
      * track, and if so it will load the next track's data and
      * automatically play the song if a song is already playing
@@ -160,6 +173,7 @@ class PlayerViewController: UIViewController {
             currentIndex = 0
         }
         loadTrackElements()
+   
         if player.rate == 1 {
             player.rate = 0
             playPauseButton.selected = !playPauseButton.selected

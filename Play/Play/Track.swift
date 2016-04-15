@@ -14,11 +14,13 @@ class Track {
     var artist: String!
     var artworkURL: String!
     var canStream: Bool!
+    var duration: Int!
     
     init (data: NSDictionary) {
         id = data.objectForKey("id") as! Int
         artist = data.objectForKey("user")?.objectForKey("username") as! String
         title = data.objectForKey("title") as! String
+        duration = data.objectForKey("duration") as! Int
         
         var originalSize: String!
         var largerSize: String!
