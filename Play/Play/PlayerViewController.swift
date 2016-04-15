@@ -24,6 +24,8 @@ class PlayerViewController: UIViewController {
     var artistLabel: UILabel!
     var titleLabel: UILabel!
     
+    var currentTrack: Track?
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         view = UIView(frame: UIScreen.mainScreen().bounds)
@@ -129,7 +131,19 @@ class PlayerViewController: UIViewController {
         let clientID = NSDictionary(contentsOfFile: path!)?.valueForKey("client_id") as! String
         let track = tracks[currentIndex]
         let url = NSURL(string: "https://api.soundcloud.com/tracks/\(track.id)/stream?client_id=\(clientID)")!
-        // FILL ME IN
+    
+        if player.currentItem == nil || track.id != currentTrack!.id {
+            let song = AVPlayerItem(URL: url)
+            player.replaceCurrentItemWithPlayerItem(song)
+            currentTrack = track
+        }
+        
+        sender.selected = !sender.selected
+        if player.rate == 0 {
+            player.play()
+        } else {
+            player.pause()
+        }
     
     }
     
@@ -140,7 +154,18 @@ class PlayerViewController: UIViewController {
      * Remember to update the currentIndex
      */
     func nextTrackTapped(sender: UIButton) {
-    
+        if (currentIndex + 1) < tracks.count {
+            currentIndex!++
+        } else {
+            currentIndex = 0
+        }
+        loadTrackElements()
+        if player.rate == 1 {
+            player.rate = 0
+            playPauseButton.selected = !playPauseButton.selected
+            playOrPauseTrack(playPauseButton)
+        }
+
     }
 
     /*
@@ -154,7 +179,22 @@ class PlayerViewController: UIViewController {
      */
 
     func previousTrackTapped(sender: UIButton) {
-    
+        let currentTimeInSeconds = CMTimeGetSeconds(player.currentTime())
+        if currentTimeInSeconds > 3 {
+            player.seekToTime(CMTimeMake(0, 1))
+        } else {
+            if (currentIndex - 1) >= 0 {
+                currentIndex!--
+            } else {
+                currentIndex = tracks.count - 1
+            }
+            loadTrackElements()
+            if player.rate == 1 {
+                player.rate = 0
+                playPauseButton.selected = !playPauseButton.selected
+                playOrPauseTrack(playPauseButton)
+            }
+        }
     }
     
     
